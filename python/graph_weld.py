@@ -9,14 +9,13 @@ files.sort()
 r = 0
 c = 0
 for file in files:
-
     # instantiate new figure when starting a new column
     if r == 0:
         plt.figure(f"C{c}", figsize=(20, 10))
     
     data = pd.read_csv(os.path.join(dir, file))
 
-    # Extract magnetic field components
+    # Extract magnetic field components from data
     Bx = data.loc[:, "Bx"]
     By = data.loc[:, "By"]
     Bz = data.loc[:, "Bz"]
@@ -59,5 +58,6 @@ for file in files:
         plt.savefig(os.path.join(dir, f'C{c}')) # save figure to chosen directory
         r = 0 
         c += 1 
+
 # display all figures created
 plt.show()
