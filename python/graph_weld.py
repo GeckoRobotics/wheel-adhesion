@@ -1,9 +1,10 @@
 import os
+import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 
 dir = "/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/mvp_data/weld_data"
-files = os.listdir(dir)
+files = os.listdir(dir + "/raw")
 files.sort()
 
 r = 0
@@ -11,9 +12,9 @@ c = 0
 for file in files:
     # instantiate new figure when starting a new column
     if r == 0:
-        plt.figure(f"C{c}", figsize=(20, 10))
+        plt.figure(figsize=(20, 10))
     
-    data = pd.read_csv(os.path.join(dir, file))
+    data = pd.read_csv(os.path.join(dir, "raw", file))
 
     # Extract magnetic field components from data
     Bx = data.loc[:, "Bx"]
@@ -40,9 +41,9 @@ for file in files:
 
     # Plotting
     plt.subplot(3, 2, r+1)
-    plt.plot(t, Bx, 'r')
-    plt.plot(t, By, 'g')
-    plt.plot(t, Bz, 'b')
+    # plt.plot(t, Bx, 'r')
+    # plt.plot(t, By, 'g')
+    # plt.plot(t, Bz, 'b')
     plt.plot(t, Bt, 'purple')
     plt.xlabel("Time (s)")
     plt.ylabel("Magnetic Field Strength (" + r'$\mu T$' + ")")
@@ -52,12 +53,12 @@ for file in files:
 
     # finish current column and prepare to start new one
     if r == 5:
-        plt.figlegend(['Bx', 'By', 'Bz', 'Bt'])
+        # plt.figlegend(['Bx', 'By', 'Bz', 'Bt'])
+        plt.figlegend(['Bt'])
         plt.subplots_adjust(hspace=0.4)
         plt.suptitle(f"C{c}") 
-        plt.savefig(os.path.join(dir, f'C{c}')) # save figure to chosen directory
+        plt.savefig(os.path.join(dir, "plots", f'Bt_C{c}')) # save figure to chosen directory
         r = 0 
         c += 1 
 
 # display all figures created
-plt.show()
