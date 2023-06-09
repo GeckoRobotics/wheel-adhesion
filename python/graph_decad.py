@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-dir = "/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/mvp_data/weld_data"
+dir = "/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/mvp_data/decreased_adhesion_data"
 files = os.listdir(dir + "/raw")
 files.sort()
 
@@ -55,8 +55,8 @@ for file in files:
         # plt.figlegend(['Bx', 'By', 'Bz', 'Bt'])
         plt.figlegend(['Bt'])
         plt.subplots_adjust(hspace=0.4)
-        plt.suptitle(f"C{c}") 
-        plt.savefig(os.path.join(dir, "plots", f'Bt_C{c}')) # save figure to chosen directory
+        plt.suptitle(f"B_total Decreased Adhesion: C{c}") 
+        plt.savefig(os.path.join(dir, "plots", f'Bt_decad_C{c}')) # save figure to chosen directory
         r = 0 
         c += 1 
 
