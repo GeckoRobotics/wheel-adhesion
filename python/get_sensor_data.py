@@ -93,14 +93,15 @@ def main():
         # plt.show()
 
         # save data as csv
-        filename = dt.datetime.now().strftime('/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/WAD_PCB_data/magnetic_data_%m-%d-%Y_%H:%M:%S.csv')
+        # data will run until user performs Ctrl+c
+        path = '/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/WAD_PCB_data/'
+        filename = dt.datetime.now().strftime(path + 'magnetic_data_%m-%d-%Y_%H:%M:%S.csv')
         with open(filename, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['Timestamp', '500 G Sensor', '1000 G Sensor', '2000 G Sensor'])
             while True:
                 data = list(get_data_point())
                 writer.writerow(data)
-
 
 if __name__ == "__main__":
     main()
