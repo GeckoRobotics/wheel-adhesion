@@ -1,5 +1,5 @@
 # Description of Python Files 
-The python scripts here were used for graphing data from the wheel-adhesion detection project
+The python scripts here were used for graphing data from the wheel adhesion detection project
 
 * MVP Scripts
     * graph_decad.py: Graph decreased adhesion data from iPhone
