@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 dir = "/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/WAD_PCB_data/"
 files = os.listdir(dir + 'raw')
 for file in files:
-    data = pd.read_csv(os.path.join(dir, file))
+    data = pd.read_csv(os.path.join(dir, 'raw', file))
 
     # Extract sensor readings from csv
     sensor_500  = data.loc[:, "500 G Sensor"] # data from ALS31313KLEATR-500
@@ -36,4 +36,4 @@ for file in files:
     plt.title("Total Magnetic Field vs Time for WAD PCB Sensors")
     plt.xlabel('Time (s)')
     plt.ylabel('Magnetic Field Strength (G)')
-    plt.savefig(dir + 'plots')
+    plt.savefig(dir + 'plots/' + file[:-4] + '_plot.jpg')
