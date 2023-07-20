@@ -17,18 +17,12 @@ y_range = [0, 400]
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 xs = list(range(0, 200))
-b_500 = [0] * x_len
-b_1000 = [0] * x_len
-b_2000 = [0] * x_len
+b = [0] * x_len
 ax.set_ylim(y_range)
 
 # Create blank lines to update live
-# line_500,  = ax.plot(xs, b_500, label="ALS31313KLEATR-500")
-# line_1000, = ax.plot(xs, b_1000, label="ALS31313KLEATR-1000" )
-# line_2000, = ax.plot(xs, b_2000, label="ALS31313KLEATR-2000")
-line_500,  = ax.plot(xs, b_500, label="x_500")
-line_1000, = ax.plot(xs, b_1000, label="y_500" )
-line_2000, = ax.plot(xs, b_2000, label="z_500")
+line,  = ax.plot(xs, b, label="ALS31313KLEATR-500")
+
 
 # Plot labels
 plt.title("Magnetic Field Strength over Time")
@@ -40,44 +34,30 @@ plt.legend()
 def get_ports():
     return serial.tools.list_ports.comports()
 
-def animate(i, b_500, b_1000, b_2000):
+def animate(i, b):
     # get B-field reading from each sensor
     sensor_data = get_data_point()
-    (_, sensor_500, sensor_1000, sensor_2000) = sensor_data
+    (_, sensor) = sensor_data
 
-    b_500.append(sensor_500)
-    b_1000.append(sensor_1000)
-    b_2000.append(sensor_2000)
+    b.append(sensor)
 
-    b_500  = b_500[-x_len:]
-    b_1000 = b_1000[-x_len:]
-    b_2000 = b_2000[-x_len:]
+    b = b[-x_len:]
+    line.set_ydata(b)
 
-    line_500.set_ydata(b_500)
-    line_1000.set_ydata(b_1000)
-    line_2000.set_ydata(b_2000)
-
-    return (line_500, line_1000, line_2000)
+    return (line,)
 
 def get_data_point():
-    data = s.read(12) # read stream of 12 bytes
-    print(f"Raw data: {data}")
+    data = s.read(4) # read stream of 12 bytes
+    # print(f"Raw data: {data}")
     data_list = list(data)
     timestamp = dt.datetime.now().strftime('%H:%M:%S.%f')
 
     # extract data components
-    data_500 = data_list[0:4]
-    data_1000 = data_list[4:8]
-    data_2000 = data_list[8:13]
-
+    data = data_list[0:4]
     # convert data from hex to floats
-    data_500 = "".join(hex(x)[2:] for x in data_500)
-    data_500 = round(math.sqrt(int(data_500, 16)), 2)
-    data_1000 = "".join(hex(x)[2:] for x in data_1000)
-    data_1000 = round(math.sqrt(int(data_1000, 16)), 2)
-    data_2000 = "".join(hex(x)[2:] for x in data_2000)
-    data_2000 = round(math.sqrt(int(data_2000, 16)), 2)
-    b_fields = (timestamp, data_500, data_1000, data_2000)
+    data = "".join(hex(x)[2:] for x in data)
+    data = round(math.sqrt(int(data, 16)), 2)
+    b_fields = (timestamp, data)
     # print(b_fields[1:])
 
     return b_fields # in the form (timestamp, ALS31313KLEATR-500 reading, ALS31313KLEATR-1000 reading, ALS31313KLEATR-2000)
@@ -93,8 +73,8 @@ def main():
     while True:
         # uncomment the two lines below for live plotting of hall-effect sensor readings
         # additionally, comment out the csv generation lines
-        # anim = animation.FuncAnimation(fig, animate, fargs=(b_500, b_1000, b_2000), interval=50, blit=True, cache_frame_data=False)
-        # plt.show()
+        anim = animation.FuncAnimation(fig, animate, fargs=(b,), interval=50, blit=True, cache_frame_data=False)
+        plt.show()
 
         # save data as csv
         # data will run until user performs Ctrl+c
@@ -106,6 +86,6 @@ def main():
         #     while True:
         #         data = list(get_data_point())
         #         writer.writerow(data)
-        data = get_data_point()
+
 if __name__ == "__main__":
     main()
