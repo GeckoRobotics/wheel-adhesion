@@ -12,7 +12,6 @@ import time
 x_len = 200
 y_range = [0, 400]
 
-
 # Create figure for plotting
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
@@ -35,7 +34,14 @@ plt.ylabel("B-Field Strength [G]")
 plt.legend()
 
 def raw2int(vals):
-    hex_str = "".join(hex(x)[2:] for x in vals)
+    hex_str = ""
+    for val in vals:
+        hex_val = hex(val)[2:]
+        if (len(hex_val) == 1):
+            hex_val = "0" + hex_val
+        hex_str += hex_val
+
+    # print(f"Hex str: {hex_str}")
     signed_int = twos_complement(hex_str, 32)
     return signed_int
 
@@ -55,7 +61,7 @@ def get_ports():
 def animate(i, b_500, b_1000, b_2000):
     # get B-field reading from each sensor
     sensor_data = get_data_point()
-    (_, sensor_500, sensor_1000, sensor_2000) = sensor_data
+    (_, _, _, _, sensor_500, _, _, _, sensor_1000, _, _, _, sensor_2000) = sensor_data
 
     b_500.append(sensor_500)
     b_1000.append(sensor_1000)
@@ -76,6 +82,7 @@ def get_data_point():
     data = s.read(n) # read stream of n bytes
     # print(f"Raw data: {data}")
     data_list = list(data)
+    # print(f"Data list: {data_list}")
     timestamp = dt.datetime.now().strftime('%H:%M:%S.%f')
 
     # extract data components
@@ -110,8 +117,8 @@ def get_data_point():
     Bt1 = compute_Bt(x1, y1, z1)
     Bt2 = compute_Bt(x2, y2, z2)
     Bt3 = compute_Bt(x3, y3, z3)
-    b_fields = (timestamp, Bt1, Bt2, Bt3)
-    print(f"Bt: {b_fields[1:]}")
+    b_fields = (timestamp, x1, y1, z1, Bt1, x2, y2, z2, Bt2, x3, y3, z3, Bt3)
+
     print(f"500: {b1}")
     print(f"1000: {b2}")
     print(f"2000: {b3}\n")
@@ -120,9 +127,10 @@ def get_data_point():
 
 ports = get_ports()
 baud_rate = 115200
+timeout = 10 # seconds
 
 # define and open port
-s = serial.Serial(ports[0].device, baud_rate) # default transaction size is 1 byte
+s = serial.Serial(ports[0].device, baud_rate, timeout=timeout) # default transaction size is 1 byte
 if (not(s.is_open)):
     s.open()
 
@@ -135,14 +143,16 @@ def main():
 
         # uncomment to save data as csv
         # data will run until user performs Ctrl+c
-        # path = '/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/WAD_PCB_data/' # path on local machine
-        path = '/data/wad/csv_files' # path to .csv files on SBC
-        filename = dt.datetime.now().strftime(path + 'magnetic_data_%m-%d-%Y_%H:%M:%S.csv')
+        path = '/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/WAD_PCB_data/' # path on local machine
+        path = '/data/wad/csv_files/' # path to .csv files on SBC
+        filename = dt.datetime.now().strftime(path + 'magnetic_data_%m-%d-%Y_%H-%M-%S.csv')
         with open(filename, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['Timestamp', '500 G Sensor', '1000 G Sensor', '2000 G Sensor'])
+            header = ['Timestamp', 'x-500', 'y-500', 'z-500', 'Bt-500', 'x-1000', 'y-1000', 'z-1000', 'Bt-1000', 'x-2000', 'y-2000', 'z-2000', 'Bt-2000']
+            writer.writerow(header)
             while True:
                 data = list(get_data_point())
                 writer.writerow(data)
+
 if __name__ == "__main__":
     main()
