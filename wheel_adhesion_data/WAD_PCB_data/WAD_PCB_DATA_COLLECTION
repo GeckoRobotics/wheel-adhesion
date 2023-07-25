@@ -1,22 +1,25 @@
-***********************
-WAD PCB DATA COLLECTION
-***********************
+************************************
+WAD PCB DATA COLLECTION - TANK SHELL
+************************************
 
-PCB perpendictular to robot (2000 G sensor closest to wheel)
-____________________________________________________________
-Small weld line: 07-24-2023_22-18-59 to 07-24-2023_22-39-21
-Large weld line:  07-24-2023_22-50-31 to 07-24-2023_22-52-38
-Decreased Adhesion (thin aluminum): 07-24-2023_23-43-07 to 07-24-2023_23-47-16
-Decreased Adhesion (thick aluminum): 
-
-
-
-
-
-
-PCB parallel to robot (intended direction)
+PCB in Intended Orientation (Note that x-500, y-500, y-1000 were all saturated, so only data from ALS31313KLEATR-2000 is valid)
 __________________________________________ 
-Small weld line: 07-24-2023_23-17-29 to 07-24-2023_23-19-48
-Large weld line: 07-24-2023_22-57-56 to 07-24-2023_23-00-46
-Decreased adhesion (thin aluminum): 07-24-2023_23-31-04 to 07-24-2023_23-37-17
+Decreased adhesion (thick aluminum): 07-25-2023_21-54-20 to  07-25-2023_21-58-45
+
+Decreased adhesion (thin aluminum): 07-25-2023_22-10-34 to  07-25-2023_22-13-12 
+
+Small weld line: 07-25-2023_22-46-08 to  07-25-2023_22-48-05 
+
+Big weld line: 07-25-2023_22-55-51 to  07-25-2023_22-59-03
+
+
+
+PCB Rotated 180 degrees
+______________________
 Decreased adhesion (thick aluminum):
+
+Decreased adhesion (thin aluminum):
+
+Small weld line: 07-26-2023_03-18-12 to 07-26-2023_03-20-38
+
+Big weld line: 07-26-2023_03-11-35 to 07-26-2023_03-14-43

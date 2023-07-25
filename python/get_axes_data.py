@@ -98,17 +98,20 @@ def get_data_point():
     y3 = data_list[28:32]
     z3 = data_list[32:]
 
-    # convert data from hex to floats
-    x1 = raw2int(x1)
-    y1 = raw2int(y1)
-    z1 = raw2int(z1)
+    # convert data from hex to floats and divide by sensor sensitivity
+    sens_500 = 4 # LSB/G, sensitivity of ALS31313KLEATR-500
+    x1 = raw2int(x1) / 4
+    y1 = raw2int(y1) / 4
+    z1 = raw2int(z1) / 4
     b1 = (x1, y1, z1)
 
-    x2 = raw2int(x2)
-    y2 = raw2int(y2)
-    z2 = raw2int(z2)
+    sens_1000 = 2 # LSB/G, sensitivity of ALS31313KLEATR-1000
+    x2 = raw2int(x2) / 2
+    y2 = raw2int(y2) / 2 
+    z2 = raw2int(z2) / 2
     b2 = (x2, y2, z2)
 
+    # sensitivity for ALS31313KLEATR-2000 is 1 LSB/G
     x3 = raw2int(x3)
     y3 = raw2int(y3)
     z3 = raw2int(z3)
@@ -153,6 +156,7 @@ def main():
             while True:
                 data = list(get_data_point())
                 writer.writerow(data)
+
 
 if __name__ == "__main__":
     main()
