@@ -42,9 +42,8 @@
 #define SENS_1000 1 // divide by 2 LSB/G
 
 // Sensor I2C Addresses
-#define I2C_ADDR_500 (uint16_t)96 // +-500 G sensor (U4)
-#define I2C_ADDR_1000 (uint16_t)99 // +-1000 G sensor (U3)
-#define I2C_ADDR_2000 (uint16_t)108 // +-2000 G sensor (U5)
+#define I2C_ADDR_2000_top (uint16_t)108 // +-2000 G sensor (U5)
+#define I2C_ADDR_2000_bottom (uint16_t)0
 
 /* Debug Exception and Monitor Control Register base address */
 #define DEMCR                 *((volatile uint32_t*) 0xE000EDFCu)
@@ -134,9 +133,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // initialize all hall-effect sensors
-  hall_sensor_init(I2C_ADDR_500);
-  hall_sensor_init(I2C_ADDR_1000);
-  hall_sensor_init(I2C_ADDR_2000);
+  hall_sensor_init(I2C_ADDR_2000_top);
+  hall_sensor_init(I2C_ADDR_2000_bottom);
 
   /* USER CODE END 2 */
 
@@ -144,20 +142,15 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	// Read component fields from ALS31313KLEATR-500
-	int32_t x_500 = single_read_component_field(I2C_ADDR_500, 0);
-	int32_t y_500 = single_read_component_field(I2C_ADDR_500, 1);
-	int32_t z_500 = single_read_component_field(I2C_ADDR_500, 2);
+	// Read component fields from top ALS31313KLEATR-2000
+	int32_t x_2000 = single_read_component_field(I2C_ADDR_2000_top, 0);
+	int32_t y_2000 = single_read_component_field(I2C_ADDR_2000_top, 1);
+	int32_t z_2000 = single_read_component_field(I2C_ADDR_2000_top, 2);
 
-	// Read component fields from ALS31313KLEATR-1000
-	int32_t x_1000 = single_read_component_field(I2C_ADDR_1000, 0);
-	int32_t y_1000 = single_read_component_field(I2C_ADDR_1000, 1);
-	int32_t z_1000 = single_read_component_field(I2C_ADDR_1000, 2);
-
-	// Read component fields from ALS31313KLEATR-2000
-	int32_t x_2000 = single_read_component_field(I2C_ADDR_2000, 0);
-	int32_t y_2000 = single_read_component_field(I2C_ADDR_2000, 1);
-	int32_t z_2000 = single_read_component_field(I2C_ADDR_2000, 2);
+  // Read component fields from bottom ALS31313KLEATR-2000
+	int32_t x_2000 = single_read_component_field(I2C_ADDR_2000_bottom, 0);
+	int32_t y_2000 = single_read_component_field(I2C_ADDR_2000_bottom, 1);
+	int32_t z_2000 = single_read_component_field(I2C_ADDR_2000_bottom, 2);
 
 	// send data to USB host
 	transmit_component_fields_USB(x_500, y_500, z_500, x_1000, y_1000, z_1000, x_2000, y_2000, z_2000);
@@ -309,7 +302,7 @@ static void MX_GPIO_Init(void)
  * @param z3: z-component for ALS31313KLEATR-2000
  * @retval None
  */
-static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2, int32_t x3, int32_t y3, int32_t z3)
+static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2)
 {
 	uint8_t *x1_vals = (uint8_t *)&x1;
 	uint8_t *y1_vals = (uint8_t *)&y1;
@@ -319,10 +312,7 @@ static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, in
 	uint8_t *y2_vals = (uint8_t *)&y2;
 	uint8_t *z2_vals = (uint8_t *)&z2;
 
-	uint8_t *x3_vals = (uint8_t *)&x3;
-	uint8_t *y3_vals = (uint8_t *)&y3;
-	uint8_t *z3_vals = (uint8_t *)&z3;
-	uint8_t buffer[36] = {0};
+	uint8_t buffer[24] = {0};
 
 	for (uint8_t i = 0; i < sizeof(buffer); ++i)
 	{
@@ -351,26 +341,10 @@ static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, in
 			buffer[i] = y2_vals[19 - i];
 		}
 
-		else if ((i >= 20) & (i <= 23))
+		else
 		{
 			buffer[i] = z2_vals[23 - i];
 		}
-
-		else if ((i >= 24) & (i <= 27))
-		{
-			buffer[i] = x3_vals[27 - i];
-		}
-
-		else if ((i >= 28) & (i <= 31))
-		{
-			buffer[i] = y3_vals[31 - i];
-		}
-
-		else
-		{
-			buffer[i] = z3_vals[35 - i];
-		}
-
 	}
 
 	CDC_Transmit_FS(buffer, sizeof(buffer));
@@ -389,12 +363,28 @@ static void hall_sensor_init(uint16_t dev_address)
 	HAL_I2C_Mem_Write(&hi2c1, dev_address << 1, 0x35, I2C_MEMADD_SIZE_8BIT, access_code, DATA_SIZE, TIMEOUT);
 	HAL_Delay(1000);
 
-	// Enables X, Y, and Z channels
-	// Sets hall mode to 00 and BW select to 000
-	// BW Select = 000 corresponds with a three channel update rate of 2 kHz
-	uint8_t init_data[4] = {0x00, 0x00, 0x01, 0xC0};
-	HAL_I2C_Mem_Write(&hi2c1, dev_address << 1, 0x02, I2C_MEMADD_SIZE_8BIT, init_data, DATA_SIZE, TIMEOUT);
-	HAL_Delay(1000);
+  if (dev_address != 0)
+  {
+    // Enables X, Y, and Z channels
+	  // Sets hall mode to 00 and BW select to 000
+	  // BW Select = 000 corresponds with a three channel update rate of 2 kHz
+    uint8_t init_data[4] = {0x00, 0x00, 0x01, 0xC0};
+    HAL_I2C_Mem_Write(&hi2c1, dev_address << 1, 0x02, I2C_MEMADD_SIZE_8BIT, init_data, DATA_SIZE, TIMEOUT);
+    HAL_Delay(1000);
+  }
+
+  else
+  {
+    // Enables X, Y, and Z channels
+	  // Sets hall mode to 00 and BW select to 000
+	  // BW Select = 000 corresponds with a three channel update rate of 2 kHz
+    // Sets "Disable Slave ADC" to 1 to use I2C address set in EEPROM
+    uint8_t init_data[4] = {0x00, 0x02, 0x01, 0xC0};
+    HAL_I2C_Mem_Write(&hi2c1, dev_address << 1, 0x02, I2C_MEMADD_SIZE_8BIT, init_data, DATA_SIZE, TIMEOUT);
+    HAL_Delay(1000);
+  }
+	
+	
 }
 
 /**

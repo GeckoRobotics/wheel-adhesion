@@ -86,45 +86,34 @@ def get_data_point():
     timestamp = dt.datetime.now().strftime('%H:%M:%S.%f')
 
     # extract data components
+    # top ALS31313KLEATR-2000 
     x1 = data_list[0:4]
     y1 = data_list[4:8]
     z1 = data_list[8:12]
 
+    # bottom ALS31313KLEATR-2000 
     x2 = data_list[12:16]
     y2 = data_list[16:20]
     z2 = data_list[20:24]
 
-    x3 = data_list[24:28]
-    y3 = data_list[28:32]
-    z3 = data_list[32:]
-
-    # convert data from hex to floats and divide by sensor sensitivity
-    sens_500 = 4 # LSB/G, sensitivity of ALS31313KLEATR-500
-    x1 = raw2int(x1) / 4
-    y1 = raw2int(y1) / 4
-    z1 = raw2int(z1) / 4
+    # convert data from hex to floats
+    x1 = raw2int(x1)
+    y1 = raw2int(y1)
+    z1 = raw2int(z1)
     b1 = (x1, y1, z1)
 
-    sens_1000 = 2 # LSB/G, sensitivity of ALS31313KLEATR-1000
     x2 = raw2int(x2) / 2
     y2 = raw2int(y2) / 2 
     z2 = raw2int(z2) / 2
     b2 = (x2, y2, z2)
 
-    # sensitivity for ALS31313KLEATR-2000 is 1 LSB/G
-    x3 = raw2int(x3)
-    y3 = raw2int(y3)
-    z3 = raw2int(z3)
-    b3 = (x3, y3, z3)
-
     Bt1 = compute_Bt(x1, y1, z1)
     Bt2 = compute_Bt(x2, y2, z2)
-    Bt3 = compute_Bt(x3, y3, z3)
-    b_fields = (timestamp, x1, y1, z1, Bt1, x2, y2, z2, Bt2, x3, y3, z3, Bt3)
-
-    print(f"500: {b1}")
-    print(f"1000: {b2}")
-    print(f"2000: {b3}\n")
+    Bt_diff = Bt1 - Bt2
+    b_fields = (timestamp, x1, y1, z1, Bt1, x2, y2, z2, Bt2, Bt_diff)
+    print(f"2000 Top: {b1}")
+    print(f"2000 Bottom: {b2}")
+    print(f"Difference: {Bt_diff}")
 
     return b_fields # in the form (timestamp, ALS31313KLEATR-500 reading, ALS31313KLEATR-1000 reading, ALS31313KLEATR-2000)
 
@@ -151,7 +140,7 @@ def main():
         filename = dt.datetime.now().strftime(path + 'magnetic_data_%m-%d-%Y_%H-%M-%S.csv')
         with open(filename, 'w', newline='') as f:
             writer = csv.writer(f)
-            header = ['Timestamp', 'x-500', 'y-500', 'z-500', 'Bt-500', 'x-1000', 'y-1000', 'z-1000', 'Bt-1000', 'x-2000', 'y-2000', 'z-2000', 'Bt-2000']
+            header = ['Timestamp', 'x-top', 'y-top', 'z-top', 'Bt-top', 'x-bottom', 'y-bottom', 'z-bottom', 'Bt-bottom', 'Bt-difference']
             writer.writerow(header)
             while True:
                 data = list(get_data_point())
