@@ -38,12 +38,10 @@
 #define DATA_SIZE (uint16_t)4 // bytes
 #define MEM_ADDR_SIZE (uint16_t)2 // bytes
 #define TIMEOUT (uint32_t)1000
-#define SENS_500 2 // divide by 4 LSB/G
-#define SENS_1000 1 // divide by 2 LSB/G
 
 // Sensor I2C Addresses
 #define I2C_ADDR_2000_top (uint16_t)108 // +-2000 G sensor (U5)
-#define I2C_ADDR_2000_bottom (uint16_t)0
+#define I2C_ADDR_2000_bottom (uint16_t)108
 
 /* Debug Exception and Monitor Control Register base address */
 #define DEMCR                 *((volatile uint32_t*) 0xE000EDFCu)
