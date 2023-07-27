@@ -102,9 +102,9 @@ def get_data_point():
     z1 = raw2int(z1)
     b1 = (x1, y1, z1)
 
-    x2 = raw2int(x2) / 2
-    y2 = raw2int(y2) / 2 
-    z2 = raw2int(z2) / 2
+    x2 = raw2int(x2)
+    y2 = raw2int(y2)
+    z2 = raw2int(z2)
     b2 = (x2, y2, z2)
 
     Bt1 = compute_Bt(x1, y1, z1)
