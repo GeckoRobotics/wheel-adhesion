@@ -16,16 +16,16 @@ y_range = [0, 400]
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 xs = list(range(0, 200))
-b_500 = [0] * x_len
-b_1000 = [0] * x_len
-b_2000 = [0] * x_len
+b_top = [0] * x_len
+b_bottom = [0] * x_len
+b_diff = [0] * x_len
 bt = [0] * x_len
 ax.set_ylim(y_range)
 
 # Create blank lines to update live
-line_500,  = ax.plot(xs, b_500, label="ALS31313KLEATR-500")
-line_1000, = ax.plot(xs, b_1000, label="ALS31313KLEATR-1000" )
-line_2000, = ax.plot(xs, b_2000, label="ALS31313KLEATR-2000")
+line_top,  = ax.plot(xs, b_top, label="ALS31313KLEATR-500")
+line_bottom, = ax.plot(xs, b_bottom, label="ALS31313KLEATR-1000" )
+line_diff, = ax.plot(xs, b_diff, label="ALS31313KLEATR-2000")
 
 # Plot labels
 plt.title("Magnetic Field Strength over Time")
@@ -58,24 +58,24 @@ def twos_complement(hexstr, bits):
 def get_ports():
     return serial.tools.list_ports.comports()
 
-def animate(i, b_500, b_1000, b_2000):
+def animate(i, b_top, b_bottom, b_diff):
     # get B-field reading from each sensor
     sensor_data = get_data_point()
-    (_, _, _, _, sensor_500, _, _, _, sensor_1000, _, _, _, sensor_2000) = sensor_data
+    (_, _, _, _, sensor_top, _, _, _, sensor_bottom, sensor_diff) = sensor_data
 
-    b_500.append(sensor_500)
-    b_1000.append(sensor_1000)
-    b_2000.append(sensor_2000)
+    b_500.append(sensor_top)
+    b_1000.append(sensor_bottom)
+    b_2000.append(sensor_diff)
 
     b_500  = b_500[-x_len:]
     b_1000 = b_1000[-x_len:]
     b_2000 = b_2000[-x_len:]
 
-    line_500.set_ydata(b_500)
-    line_1000.set_ydata(b_1000)
-    line_2000.set_ydata(b_2000)
+    line_top.set_ydata(b_top)
+    line_bottom.set_ydata(b_bottom)
+    line_diff.set_ydata(b_diff)
 
-    return (line_500, line_1000, line_2000)
+    return (line_top, line_bottom, line_diff)
 
 def get_data_point():
     n = 36
@@ -130,7 +130,7 @@ def main():
     while True:
         # uncomment the two lines below for live plotting of hall-effect sensor readings
         # additionally, comment out the csv generation lines
-        # anim = animation.FuncAnimation(fig, animate, fargs=(b_500, b_1000, b_2000), interval=50, blit=True, cache_frame_data=False)
+        # anim = animation.FuncAnimation(fig, animate, fargs=(b_top, b_bottom, b_diff), interval=50, blit=True, cache_frame_data=False)
         # plt.show()
 
         # uncomment to save data as csv
