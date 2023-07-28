@@ -40,7 +40,7 @@
 #define TIMEOUT (uint32_t)1000
 
 // Sensor I2C Addresses
-#define I2C_ADDR_2000_top (uint16_t)108 // +-2000 G sensor (U5)
+#define I2C_ADDR_2000_top (uint16_t)108 
 #define I2C_ADDR_2000_bottom (uint16_t)108
 
 /* Debug Exception and Monitor Control Register base address */
