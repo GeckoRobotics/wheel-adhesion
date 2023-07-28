@@ -40,8 +40,8 @@
 #define TIMEOUT (uint32_t)1000
 
 // Sensor I2C Addresses
-#define I2C_ADDR_2000_top (uint16_t)108 
-#define I2C_ADDR_2000_bottom (uint16_t)108
+#define I2C_ADDR_2000_top (uint16_t)96 // sensor above front left wheel
+#define I2C_ADDR_2000_bottom (uint16_t)108 // sensor above rear left wheel
 
 /* Debug Exception and Monitor Control Register base address */
 #define DEMCR                 *((volatile uint32_t*) 0xE000EDFCu)
@@ -361,28 +361,12 @@ static void hall_sensor_init(uint16_t dev_address)
 	HAL_I2C_Mem_Write(&hi2c1, dev_address << 1, 0x35, I2C_MEMADD_SIZE_8BIT, access_code, DATA_SIZE, TIMEOUT);
 	HAL_Delay(1000);
 
-  if (dev_address != 0)
-  {
-    // Enables X, Y, and Z channels
-	  // Sets hall mode to 00 and BW select to 000
-	  // BW Select = 000 corresponds with a three channel update rate of 2 kHz
-    uint8_t init_data[4] = {0x00, 0x00, 0x01, 0xC0};
-    HAL_I2C_Mem_Write(&hi2c1, dev_address << 1, 0x02, I2C_MEMADD_SIZE_8BIT, init_data, DATA_SIZE, TIMEOUT);
-    HAL_Delay(1000);
-  }
-
-  else
-  {
-    // Enables X, Y, and Z channels
-	  // Sets hall mode to 00 and BW select to 000
-	  // BW Select = 000 corresponds with a three channel update rate of 2 kHz
-    // Sets "Disable Slave ADC" to 1 to use I2C address set in EEPROM
-    uint8_t init_data[4] = {0x00, 0x02, 0x01, 0xC0};
-    HAL_I2C_Mem_Write(&hi2c1, dev_address << 1, 0x02, I2C_MEMADD_SIZE_8BIT, init_data, DATA_SIZE, TIMEOUT);
-    HAL_Delay(1000);
-  }
-	
-	
+  // Enables X, Y, and Z channels
+  // Sets hall mode to 00 and BW select to 000
+  // BW Select = 000 corresponds with a three channel update rate of 2 kHz
+  uint8_t init_data[4] = {0x00, 0x00, 0x01, 0xC0};
+  HAL_I2C_Mem_Write(&hi2c1, dev_address << 1, 0x02, I2C_MEMADD_SIZE_8BIT, init_data, DATA_SIZE, TIMEOUT);
+  HAL_Delay(1000);
 }
 
 /**
