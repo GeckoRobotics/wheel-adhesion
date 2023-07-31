@@ -64,8 +64,8 @@ all: main-build
 main-build: WAD_board.elf secondary-outputs
 
 # Tool invocations
-WAD_board.elf WAD_board.map: $(OBJS) $(USER_OBJS) /home/pkuhle/STM32CubeIDE/workspace_1.12.1/WAD_board/STM32F303CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "WAD_board.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/pkuhle/STM32CubeIDE/workspace_1.12.1/WAD_board/STM32F303CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="WAD_board.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+WAD_board.elf WAD_board.map: $(OBJS) $(USER_OBJS) /home/pkuhle/src/wheel-adhesion/WAD_board/STM32F303CBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "WAD_board.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/pkuhle/src/wheel-adhesion/WAD_board/STM32F303CBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="WAD_board.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

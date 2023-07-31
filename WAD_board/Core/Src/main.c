@@ -41,7 +41,7 @@
 
 // Sensor I2C Addresses
 #define I2C_ADDR_2000_top (uint16_t)96 // sensor above front left wheel
-#define I2C_ADDR_2000_bottom (uint16_t)108 // sensor above rear left wheel
+ #define I2C_ADDR_2000_bottom (uint16_t)108 // sensor above rear left wheel
 
 /* Debug Exception and Monitor Control Register base address */
 #define DEMCR                 *((volatile uint32_t*) 0xE000EDFCu)
@@ -85,7 +85,7 @@ static void MX_I2C1_Init(void);
 static void hall_sensor_init(uint16_t dev_address);
 static int16_t convert_8_to_16(uint8_t dataFirst, uint8_t dataSecond);
 static int16_t single_read_component_field(uint16_t dev_address, uint8_t axis);
-static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2, int32_t x3, int32_t y3, int32_t z3);
+static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2);
 
 /* USER CODE END PFP */
 
@@ -134,6 +134,12 @@ int main(void)
   hall_sensor_init(I2C_ADDR_2000_top);
   hall_sensor_init(I2C_ADDR_2000_bottom);
 
+  uint8_t check1[4] = {0};
+  HAL_I2C_Mem_Read(&hi2c1, I2C_ADDR_2000_top << 1, 0x02, I2C_MEMADD_SIZE_8BIT, check1, DATA_SIZE, TIMEOUT);
+
+  uint8_t check2[4] = {0};
+  HAL_I2C_Mem_Read(&hi2c1, I2C_ADDR_2000_bottom << 1, 0x02, I2C_MEMADD_SIZE_8BIT, check2, DATA_SIZE, TIMEOUT);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -141,17 +147,25 @@ int main(void)
   while (1)
   {
 	// Read component fields from top ALS31313KLEATR-2000
-	int32_t x_2000 = single_read_component_field(I2C_ADDR_2000_top, 0);
-	int32_t y_2000 = single_read_component_field(I2C_ADDR_2000_top, 1);
-	int32_t z_2000 = single_read_component_field(I2C_ADDR_2000_top, 2);
+	int32_t x_top = single_read_component_field(I2C_ADDR_2000_top, 0);
+	int32_t y_top = single_read_component_field(I2C_ADDR_2000_top, 1);
+	int32_t z_top = single_read_component_field(I2C_ADDR_2000_top, 2);
 
-  // Read component fields from bottom ALS31313KLEATR-2000
-	int32_t x_2000 = single_read_component_field(I2C_ADDR_2000_bottom, 0);
-	int32_t y_2000 = single_read_component_field(I2C_ADDR_2000_bottom, 1);
-	int32_t z_2000 = single_read_component_field(I2C_ADDR_2000_bottom, 2);
+    // Read component fields from bottom ALS31313KLEATR-2000
+	int32_t x_bottom = single_read_component_field(I2C_ADDR_2000_bottom, 0);
+	int32_t y_bottom = single_read_component_field(I2C_ADDR_2000_bottom, 1);
+	int32_t z_bottom = single_read_component_field(I2C_ADDR_2000_bottom, 2);
 
+	//	int32_t x_top = 0xDEADBEEF;
+	//	int32_t y_top = 0xDEADBEEF;
+	//	int32_t z_top = 0xDEADBEEF;
+	//  // Read component fields from bottom ALS31313KLEATR-2000
+	//	int32_t x_bottom = 0xDEADBEEF;
+	//	int32_t y_bottom = 0xDEADBEEF;
+	//	int32_t z_bottom = 0xDEADBEEF;
+	// printf("Top: (%ld, %ld, %ld), Bottom: (%ld, %ld, %ld)\n\r", x_top, y_top, z_top, x_bottom, y_bottom, z_bottom);
 	// send data to USB host
-	transmit_component_fields_USB(x_500, y_500, z_500, x_1000, y_1000, z_1000, x_2000, y_2000, z_2000);
+	transmit_component_fields_USB(x_top, y_top, z_top, x_bottom, y_bottom, z_bottom);
 
     /* USER CODE END WHILE */
 
@@ -397,7 +411,7 @@ static int16_t single_read_component_field(uint16_t dev_address, uint8_t axis)
 	uint8_t Lsbs[2] = {0};
 	int16_t b_field = 0;
 	HAL_I2C_Mem_Read(&hi2c1, dev_address << 1, 0x28, I2C_MEMADD_SIZE_8BIT, data, DATA_SIZE * 2, TIMEOUT); // read MSBs
-	// HAL_Delay(150);
+	//HAL_Delay(300);
 
 	// populate MSBs
 	for (uint8_t i = 0; i < 3; ++i)

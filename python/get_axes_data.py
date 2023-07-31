@@ -19,13 +19,12 @@ xs = list(range(0, 200))
 b_top = [0] * x_len
 b_bottom = [0] * x_len
 b_diff = [0] * x_len
-bt = [0] * x_len
 ax.set_ylim(y_range)
 
 # Create blank lines to update live
-line_top,  = ax.plot(xs, b_top, label="ALS31313KLEATR-500")
-line_bottom, = ax.plot(xs, b_bottom, label="ALS31313KLEATR-1000" )
-line_diff, = ax.plot(xs, b_diff, label="ALS31313KLEATR-2000")
+line_top,  = ax.plot(xs, b_top, label="ALS31313KLEATR-2000 Front")
+line_bottom, = ax.plot(xs, b_bottom, label="ALS31313KLEATR-2000 Rear" )
+line_diff, = ax.plot(xs, b_diff, label="Front - Rear")
 
 # Plot labels
 plt.title("Magnetic Field Strength over Time")
@@ -63,13 +62,13 @@ def animate(i, b_top, b_bottom, b_diff):
     sensor_data = get_data_point()
     (_, _, _, _, sensor_top, _, _, _, sensor_bottom, sensor_diff) = sensor_data
 
-    b_500.append(sensor_top)
-    b_1000.append(sensor_bottom)
-    b_2000.append(sensor_diff)
+    b_top.append(sensor_top)
+    b_bottom.append(sensor_bottom)
+    b_diff.append(sensor_diff)
 
-    b_500  = b_500[-x_len:]
-    b_1000 = b_1000[-x_len:]
-    b_2000 = b_2000[-x_len:]
+    b_top  = b_top[-x_len:]
+    b_bottom = b_bottom[-x_len:]
+    b_diff = b_diff[-x_len:]
 
     line_top.set_ydata(b_top)
     line_bottom.set_ydata(b_bottom)
@@ -78,7 +77,7 @@ def animate(i, b_top, b_bottom, b_diff):
     return (line_top, line_bottom, line_diff)
 
 def get_data_point():
-    n = 36
+    n = 24
     data = s.read(n) # read stream of n bytes
     # print(f"Raw data: {data}")
     data_list = list(data)
@@ -111,15 +110,15 @@ def get_data_point():
     Bt2 = compute_Bt(x2, y2, z2)
     Bt_diff = Bt1 - Bt2
     b_fields = (timestamp, x1, y1, z1, Bt1, x2, y2, z2, Bt2, Bt_diff)
-    print(f"2000 Top: {b1}")
-    print(f"2000 Bottom: {b2}")
+    print(f"Top: {b1}")
+    print(f"Bottom: {b2}")
     print(f"Difference: {Bt_diff}")
 
     return b_fields # in the form (timestamp, ALS31313KLEATR-500 reading, ALS31313KLEATR-1000 reading, ALS31313KLEATR-2000)
 
 ports = get_ports()
 baud_rate = 115200
-timeout = 10 # seconds
+timeout = 5 # seconds
 
 # define and open port
 s = serial.Serial(ports[0].device, baud_rate, timeout=timeout) # default transaction size is 1 byte
@@ -145,7 +144,6 @@ def main():
             while True:
                 data = list(get_data_point())
                 writer.writerow(data)
-
 
 if __name__ == "__main__":
     main()
