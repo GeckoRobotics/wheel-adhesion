@@ -5,14 +5,12 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import math
 import csv
-import os
-import time 
 
-# Parameters
-x_len = 200
-y_range = [0, 400]
+#### CODE FOR LIVE PLOTTING TOTAL B-FIELD ####
 
 # Create figure for plotting
+x_len = 200
+y_range = [0, 400]
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 xs = list(range(0, 200))
@@ -32,31 +30,7 @@ plt.xlabel("Samples")
 plt.ylabel("B-Field Strength [G]")
 plt.legend()
 
-def raw2int(vals):
-    hex_str = ""
-    for val in vals:
-        hex_val = hex(val)[2:]
-        if (len(hex_val) == 1):
-            hex_val = "0" + hex_val
-        hex_str += hex_val
-
-    # print(f"Hex str: {hex_str}")
-    signed_int = twos_complement(hex_str, 32)
-    return signed_int
-
-def compute_Bt(x, y, z):
-    return round(math.sqrt(x ** 2 + y ** 2 + z ** 2), 2)
-
-def twos_complement(hexstr, bits):
-    value = int(hexstr, 16)
-    if value & (1 << (bits - 1)):
-        value -= 1 << bits
-    return value
-
-# get available serial ports
-def get_ports():
-    return serial.tools.list_ports.comports()
-
+# plot animation function
 def animate(i, b_top, b_bottom, b_diff):
     # get B-field reading from each sensor
     sensor_data = get_data_point()
@@ -76,26 +50,58 @@ def animate(i, b_top, b_bottom, b_diff):
 
     return (line_top, line_bottom, line_diff)
 
+#### CODE FOR COMPUTING B-FIELDS FROM DATA FROM SERIAL PORT ####
+
+# converts raw data to signed int
+# takes in list of 8 bit unsigned ints
+def raw2int(vals):
+    hex_str = ""
+    for val in vals:
+        hex_val = hex(val)[2:] # convert in to hex string
+        if (len(hex_val) == 1):
+            # prepend zero if hex_val can be represented with only one hex character
+            # prevents loss of four bits when appending to hex_str
+            hex_val = "0" + hex_val 
+        hex_str += hex_val
+
+    signed_int = twos_complement(hex_str, 32)
+    return signed_int
+
+# Compute magnitude of sensor reading
+def compute_Bt(x, y, z):
+    return round(math.sqrt(x ** 2 + y ** 2 + z ** 2), 2)
+
+# gets signed int from unsigned int by computing 2s complement
+def twos_complement(hexstr, bits):
+    value = int(hexstr, 16) # unsigned int
+    if value & (1 << (bits - 1)):
+        value -= 1 << bits
+    return value
+
+# get available serial ports
+def get_ports():
+    return serial.tools.list_ports.comports()
+
+# get one sensor reading from serial port
 def get_data_point():
     n = 24
-    data = s.read(n) # read stream of n bytes
-    # print(f"Raw data: {data}")
-    data_list = list(data)
-    # print(f"Data list: {data_list}")
+    data = s.read(n) # read stream of n bytes (byte object)
+    data_list = list(data) # creats list of values by converting every 8 bytes into an unsigned int
     timestamp = dt.datetime.now().strftime('%H:%M:%S.%f')
 
     # extract data components
-    # top ALS31313KLEATR-2000 
+    # front ALS31313KLEATR-2000 
     x1 = data_list[0:4]
     y1 = data_list[4:8]
     z1 = data_list[8:12]
 
-    # bottom ALS31313KLEATR-2000 
+    # rear ALS31313KLEATR-2000 
     x2 = data_list[12:16]
     y2 = data_list[16:20]
     z2 = data_list[20:24]
 
     # convert data from hex to floats
+    # divide by 1 to convert to Gauss because ALS31313KLEATR-2000 sensitivity is 1 LSB/G
     x1 = raw2int(x1)
     y1 = raw2int(y1)
     z1 = raw2int(z1)
@@ -109,12 +115,13 @@ def get_data_point():
     Bt1 = compute_Bt(x1, y1, z1)
     Bt2 = compute_Bt(x2, y2, z2)
     Bt_diff = Bt1 - Bt2
-    b_fields = (timestamp, x1, y1, z1, Bt1, x2, y2, z2, Bt2, Bt_diff)
+
     print(f"Top: {b1}")
     print(f"Bottom: {b2}")
     print(f"Difference: {Bt_diff}")
 
-    return b_fields # in the form (timestamp, ALS31313KLEATR-500 reading, ALS31313KLEATR-1000 reading, ALS31313KLEATR-2000)
+    b_fields = (timestamp, x1, y1, z1, Bt1, x2, y2, z2, Bt2, Bt_diff)
+    return b_fields
 
 ports = get_ports()
 baud_rate = 115200
@@ -127,14 +134,13 @@ if (not(s.is_open)):
 
 def main():
     while True:
-        # uncomment the two lines below for live plotting of hall-effect sensor readings
-        # additionally, comment out the csv generation lines
-        # anim = animation.FuncAnimation(fig, animate, fargs=(b_top, b_bottom, b_diff), interval=50, blit=True, cache_frame_data=False)
+        # uncomment lines 157-158 for live plotting of total B-field for each of the three sensors
+        # anim = animation.FuncAnimation(fig, animate, fargs=(b_500, b_1000, b_2000), interval=50, blit=True, cache_frame_data=False)
         # plt.show()
 
-        # uncomment to save data as csv
-        # data will run until user performs Ctrl+c
-        path = '/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/WAD_PCB_data/' # path on local machine
+        # uncomment lines 162-171 to save data as csv
+        # data collection will continue until user performs Ctrl+c
+        path = '/home/pkuhle/src/wheel-adhesion/wheel_adhesion_data/WAD_PCB_data/' # path on local machine (SBC)
         path = '/data/wad/csv_files/' # path to .csv files on SBC
         filename = dt.datetime.now().strftime(path + 'magnetic_data_%m-%d-%Y_%H-%M-%S.csv')
         with open(filename, 'w', newline='') as f:
