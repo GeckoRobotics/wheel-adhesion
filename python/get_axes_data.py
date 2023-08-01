@@ -127,16 +127,17 @@ def get_data_point():
     z3 = raw2int(z3)
     b3 = (x3, y3, z3)
 
+    # Magnitude of B-field reading for ALS31313KLEATR-500, 1000, and 2000, respectively
     Bt1 = compute_Bt(x1, y1, z1)
     Bt2 = compute_Bt(x2, y2, z2)
     Bt3 = compute_Bt(x3, y3, z3)
-    b_fields = (timestamp, x1, y1, z1, Bt1, x2, y2, z2, Bt2, x3, y3, z3, Bt3)
 
     print(f"500: {b1}")
     print(f"1000: {b2}")
     print(f"2000: {b3}\n")
 
-    return b_fields # in the form (timestamp, ALS31313KLEATR-500 reading, ALS31313KLEATR-1000 reading, ALS31313KLEATR-2000)
+    b_fields = (timestamp, x1, y1, z1, Bt1, x2, y2, z2, Bt2, x3, y3, z3, Bt3)
+    return b_fields
 
 
 
