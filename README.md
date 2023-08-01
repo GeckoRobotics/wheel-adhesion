@@ -1,3 +1,3 @@
-# Wheel Adhesion Proof of Concept
+# Wheel Adhesion Detection Proof of Concept
 
-Code and data for the wheel adhesion project for TOKA 4.1
+Code and data for the wheel adhesion detection project for TOKA 4.1
