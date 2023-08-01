@@ -2,7 +2,11 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
+  * @brief          : This program makes an STM32F303CBT6 communicate with three
+  * Hall-effect sensors over I2C on the WAD PCB. The three sensors are the ALS31313KLEATR-500,
+  * ALS31313KLEATR-1000, and ALS31313KLEATR-2000. In this file, sensor values or
+  * parameters are referred to by appending 500, 1000, or 2000 for shorthand.
+  * This program also sends the sensor readings to a USB host device over USB 2.0.
   ******************************************************************************
   * @attention
   *
@@ -54,6 +58,7 @@
 #define ITM_TRACE_EN          *((volatile uint32_t*) 0xE0000E00u)
 
 /* Override low-level _write system call */
+// used for printf. must end string with \n\r
 int _write(int file, char *ptr, int len)
 {
 	(void) file;
@@ -130,7 +135,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
-  MX_USB_DEVICE_Init();
+  MX_USB_DEVICE_Init(); // virtual COM port
   /* USER CODE BEGIN 2 */
 
   // initialize all hall-effect sensors

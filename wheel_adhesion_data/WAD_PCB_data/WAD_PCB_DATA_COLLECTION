@@ -1,6 +1,8 @@
-************************************
+****************************************************************************************************
 WAD PCB DATA COLLECTION - TANK SHELL
-************************************
+This document lists the timestamps of the .csv files collected for each test (5 csv files per test).
+All files can be found on GitHub
+****************************************************************************************************
 
 PCB in Intended Orientation (Note that x-500, y-500, y-1000 were all saturated, so only data from ALS31313KLEATR-2000 is valid)
 __________________________________________ 
