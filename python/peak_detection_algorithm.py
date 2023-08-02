@@ -16,13 +16,13 @@ def thresholding_algo(y, lag, threshold, influence):
                 signals[i] = -1
 
             filteredY[i] = influence * y[i] + (1 - influence) * filteredY[i-1]
-            avgFilter[i] = np.mean(filteredY[(i-lag+1):i+1])
-            stdFilter[i] = np.std(filteredY[(i-lag+1):i+1])
         else:
             signals[i] = 0
             filteredY[i] = y[i]
-            avgFilter[i] = np.mean(filteredY[(i-lag+1):i+1])
-            stdFilter[i] = np.std(filteredY[(i-lag+1):i+1])
+
+        # update moving average and standard deviation
+        avgFilter[i] = np.mean(filteredY[(i-lag+1):i+1])
+        stdFilter[i] = np.std(filteredY[(i-lag+1):i+1])
 
     return dict(signals = np.asarray(signals),
                 avgFilter = np.asarray(avgFilter),
