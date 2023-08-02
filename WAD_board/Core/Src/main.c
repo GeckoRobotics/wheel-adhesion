@@ -156,14 +156,6 @@ int main(void)
 	int32_t y_bottom = single_read_component_field(I2C_ADDR_2000_bottom, 1);
 	int32_t z_bottom = single_read_component_field(I2C_ADDR_2000_bottom, 2);
 
-	//	int32_t x_top = 0xDEADBEEF;
-	//	int32_t y_top = 0xDEADBEEF;
-	//	int32_t z_top = 0xDEADBEEF;
-	//  // Read component fields from bottom ALS31313KLEATR-2000
-	//	int32_t x_bottom = 0xDEADBEEF;
-	//	int32_t y_bottom = 0xDEADBEEF;
-	//	int32_t z_bottom = 0xDEADBEEF;
-	// printf("Top: (%ld, %ld, %ld), Bottom: (%ld, %ld, %ld)\n\r", x_top, y_top, z_top, x_bottom, y_bottom, z_bottom);
 	// send data to USB host
 	transmit_component_fields_USB(x_top, y_top, z_top, x_bottom, y_bottom, z_bottom);
 
