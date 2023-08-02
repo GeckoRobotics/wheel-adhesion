@@ -1,13 +1,13 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
+  ********************************************************************************************
   * @file           : main.c
-  * @brief          : This program makes an STM32F303CBT6 communicate with three
-  * Hall-effect sensors over I2C on the WAD PCB. The three sensors are the ALS31313KLEATR-500,
-  * ALS31313KLEATR-1000, and ALS31313KLEATR-2000. In this file, sensor values or
+  * @brief          : This program makes an STM32F303CBT6 communicate with three Hall-effect
+  * sensors over I2C on the WAD PCB. The three sensors are the ALS31313KLEATR-500,
+  * ALS31313KLEATR-1000, and ALS31313KLEATR-2000. In this file, some sensor values or
   * parameters are referred to by appending 500, 1000, or 2000 for shorthand.
   * This program also sends the sensor readings to a USB host device over USB 2.0.
-  ******************************************************************************
+  ********************************************************************************************
   * @attention
   *
   * Copyright (c) 2023 STMicroelectronics.
@@ -333,6 +333,7 @@ static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, in
 	{
 		if (i <= 3)
 		{
+      // populate buffer (LSB -> MSB) so that data is received in the right order on the USB host (MSB -> LSB)
 			buffer[i] = x1_vals[3 - i];
 		}
 
@@ -378,6 +379,7 @@ static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, in
 
 	}
 
+  // USB device transmit
 	CDC_Transmit_FS(buffer, sizeof(buffer));
 	HAL_Delay(300);
 }
@@ -429,8 +431,8 @@ static int16_t single_read_component_field(uint16_t dev_address, uint8_t axis)
 	uint8_t Msbs[3] = {0};
 	uint8_t Lsbs[2] = {0};
 	int16_t b_field = 0;
+  // read memory addresses 0x28 (MSBs) and 0x29 (LSBs); sequential addresses make it possible to read both with (DATA_SIZE * 2) = 8 bytes
 	HAL_I2C_Mem_Read(&hi2c1, dev_address << 1, 0x28, I2C_MEMADD_SIZE_8BIT, data, DATA_SIZE * 2, TIMEOUT); // read MSBs
-	// HAL_Delay(150);
 
 	// populate MSBs
 	for (uint8_t i = 0; i < 3; ++i)
