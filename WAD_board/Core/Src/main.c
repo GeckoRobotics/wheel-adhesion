@@ -1,9 +1,13 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
+  ****************************************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
+  * @brief          : This program makes an STM32F303CBT6 communicate with two Hall-effect
+  * sensors over I2C on the WAD PCB (one over the front left wheel and one over the rear left wheel). 
+  * The two sensors are both ALS31313KLEATR-2000. In this file, some sensor values or parameters are  
+  * referred to by appending top or bottom for shorthand. This program also sends the sensor readings 
+  * to a USB host device over USB 2.0.
+  ****************************************************************************************************
   * @attention
   *
   * Copyright (c) 2023 STMicroelectronics.
@@ -41,7 +45,7 @@
 
 // Sensor I2C Addresses
 #define I2C_ADDR_2000_top (uint16_t)96 // sensor above front left wheel
- #define I2C_ADDR_2000_bottom (uint16_t)108 // sensor above rear left wheel
+#define I2C_ADDR_2000_bottom (uint16_t)108 // sensor above rear left wheel
 
 /* Debug Exception and Monitor Control Register base address */
 #define DEMCR                 *((volatile uint32_t*) 0xE000EDFCu)
@@ -51,6 +55,7 @@
 #define ITM_TRACE_EN          *((volatile uint32_t*) 0xE0000E00u)
 
 /* Override low-level _write system call */
+// used for printf. Must end string with \n\r
 int _write(int file, char *ptr, int len)
 {
 	(void) file;
@@ -133,12 +138,6 @@ int main(void)
   // initialize all hall-effect sensors
   hall_sensor_init(I2C_ADDR_2000_top);
   hall_sensor_init(I2C_ADDR_2000_bottom);
-
-  uint8_t check1[4] = {0};
-  HAL_I2C_Mem_Read(&hi2c1, I2C_ADDR_2000_top << 1, 0x02, I2C_MEMADD_SIZE_8BIT, check1, DATA_SIZE, TIMEOUT);
-
-  uint8_t check2[4] = {0};
-  HAL_I2C_Mem_Read(&hi2c1, I2C_ADDR_2000_bottom << 1, 0x02, I2C_MEMADD_SIZE_8BIT, check2, DATA_SIZE, TIMEOUT);
 
   /* USER CODE END 2 */
 
@@ -294,16 +293,13 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /**
- * @brief Send component B-field values from three sensors to USB host device
- * @param x1: x-component for ALS31313KLEATR-500
- * @param y1: y-component for ALS31313KLEATR-500
- * @param z1: z-component for ALS31313KLEATR-500
- * @param x2: x-component for ALS31313KLEATR-1000
- * @param y2: y-component for ALS31313KLEATR-1000
- * @param z2: z-component for ALS31313KLEATR-1000
- * @param x3: x-component for ALS31313KLEATR-2000
- * @param y3: y-component for ALS31313KLEATR-2000
- * @param z3: z-component for ALS31313KLEATR-2000
+ * @brief Send component B-field values from two sensors to USB host device
+ * @param x1: x-component for top ALS31313KLEATR-2000
+ * @param y1: y-component for top ALS31313KLEATR-2000
+ * @param z1: z-component for top ALS31313KLEATR-2000
+ * @param x2: x-component for bottom ALS31313KLEATR-2000
+ * @param y2: y-component for bottom ALS31313KLEATR-2000
+ * @param z2: z-component for bottom ALS31313KLEATR-2000
  * @retval None
  */
 static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2)
@@ -322,6 +318,7 @@ static void transmit_component_fields_USB(int32_t x1, int32_t y1, int32_t z1, in
 	{
 		if (i <= 3)
 		{
+      // populate buffer (LSB -> MSB) so that data is received in the right order on the USB host (MSB -> LSB)
 			buffer[i] = x1_vals[3 - i];
 		}
 
@@ -403,7 +400,6 @@ static int16_t single_read_component_field(uint16_t dev_address, uint8_t axis)
 	uint8_t Lsbs[2] = {0};
 	int16_t b_field = 0;
 	HAL_I2C_Mem_Read(&hi2c1, dev_address << 1, 0x28, I2C_MEMADD_SIZE_8BIT, data, DATA_SIZE * 2, TIMEOUT); // read MSBs
-	//HAL_Delay(300);
 
 	// populate MSBs
 	for (uint8_t i = 0; i < 3; ++i)
