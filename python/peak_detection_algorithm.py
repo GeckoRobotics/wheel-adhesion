@@ -1,5 +1,4 @@
 import numpy as np
-import pylab
 
 def thresholding_algo(y, lag, threshold, influence):
     signals = np.zeros(len(y))
@@ -10,6 +9,7 @@ def thresholding_algo(y, lag, threshold, influence):
     stdFilter[lag - 1] = np.std(y[0:lag])
     for i in range(lag, len(y)):
         if abs(y[i] - avgFilter[i-1]) > threshold * stdFilter [i-1]:
+            print(i, f"y[i] = {y[i]} | ", f"avgFilter = {avgFilter[i-1]} | ", f"stdFilter = {stdFilter[i-1]}")
             if y[i] > avgFilter[i-1]:
                 signals[i] = 1
             else:
